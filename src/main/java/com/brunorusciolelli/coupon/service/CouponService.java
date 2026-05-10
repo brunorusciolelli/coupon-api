@@ -2,10 +2,13 @@ package com.brunorusciolelli.coupon.service;
 
 import com.brunorusciolelli.coupon.domain.entity.Coupon;
 import com.brunorusciolelli.coupon.dto.CreateCouponRequest;
+import com.brunorusciolelli.coupon.exception.CouponNotFoundException;
 import com.brunorusciolelli.coupon.repository.CouponJpaEntity;
 import com.brunorusciolelli.coupon.repository.CouponMapper;
 import com.brunorusciolelli.coupon.repository.CouponRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class CouponService {
@@ -33,5 +36,16 @@ public class CouponService {
         repository.save(entity);
 
         return coupon;
+    }
+
+    public void deleteCoupon(UUID id) {
+        CouponJpaEntity entity = repository.findById(id)
+                .orElseThrow(() -> new CouponNotFoundException("Coupon with id " + id + " not found"));
+
+        Coupon coupon = mapper.toDomain(entity);
+        coupon.softDelete();
+
+        CouponJpaEntity updated = mapper.toEntity(coupon);
+        repository.save(updated);
     }
 }
