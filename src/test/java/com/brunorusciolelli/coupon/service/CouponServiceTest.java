@@ -104,6 +104,41 @@ class CouponServiceTest {
     }
 
     @Nested
+    @DisplayName("when finding a coupon by id")
+    class FindById {
+
+        @Test
+        @DisplayName("should return coupon when it exists")
+        void shouldReturnCoupon() {
+            UUID id = UUID.randomUUID();
+            Coupon existing = Coupon.restore(
+                    id, "ABCDEF", "desc",
+                    new BigDecimal("1.0"),
+                    Instant.now().plus(30, ChronoUnit.DAYS),
+                    true, false, CouponStatus.ACTIVE
+            );
+            CouponJpaEntity entity = new CouponJpaEntity();
+            when(repository.findById(id)).thenReturn(Optional.of(entity));
+            when(mapper.toDomain(entity)).thenReturn(existing);
+
+            Coupon result = service.findById(id);
+
+            assertThat(result).isEqualTo(existing);
+        }
+
+        @Test
+        @DisplayName("should throw CouponNotFoundException when coupon does not exist")
+        void shouldThrowNotFound() {
+            UUID id = UUID.randomUUID();
+            when(repository.findById(id)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> service.findById(id))
+                    .isInstanceOf(CouponNotFoundException.class)
+                    .hasMessageContaining(id.toString());
+        }
+    }
+
+    @Nested
     @DisplayName("when deleting a coupon")
     class DeleteCoupon {
 

@@ -25,6 +25,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -160,6 +161,44 @@ class CouponControllerIntegrationTest {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.message").value(containsString("6")));
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /coupon/{id}")
+    class FindById {
+
+        @Test
+        @DisplayName("should return coupon and 200 when it exists")
+        void shouldReturnCoupon() throws Exception {
+            Coupon coupon = Coupon.create(
+                    "FIND01",
+                    "Coupon to find",
+                    new BigDecimal("2.0"),
+                    Instant.now().plus(30, ChronoUnit.DAYS),
+                    true
+            );
+            repository.save(mapper.toEntity(coupon));
+
+            mockMvc.perform(get("/coupon/" + coupon.getId()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(coupon.getId().toString()))
+                    .andExpect(jsonPath("$.code").value("FIND01"))
+                    .andExpect(jsonPath("$.description").value("Coupon to find"))
+                    .andExpect(jsonPath("$.discountValue").value(2.0))
+                    .andExpect(jsonPath("$.status").value("ACTIVE"))
+                    .andExpect(jsonPath("$.published").value(true))
+                    .andExpect(jsonPath("$.redeemed").value(false));
+        }
+
+        @Test
+        @DisplayName("should return 404 when coupon does not exist")
+        void shouldReturn404WhenNotFound() throws Exception {
+            UUID nonExistentId = UUID.randomUUID();
+
+            mockMvc.perform(get("/coupon/" + nonExistentId))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.message").value(containsString(nonExistentId.toString())));
         }
     }
 

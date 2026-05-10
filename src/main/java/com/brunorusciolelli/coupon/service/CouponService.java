@@ -8,6 +8,7 @@ import com.brunorusciolelli.coupon.repository.CouponMapper;
 import com.brunorusciolelli.coupon.repository.CouponRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -38,6 +39,12 @@ public class CouponService {
         return coupon;
     }
 
+    public Coupon findById(UUID id) {
+        return repository.findById(id)
+                .map(mapper::toDomain)
+                .orElseThrow(() -> new CouponNotFoundException("Coupon with id " + id + " not found"));
+    }
+
     public void deleteCoupon(UUID id) {
         CouponJpaEntity entity = repository.findById(id)
                 .orElseThrow(() -> new CouponNotFoundException("Coupon with id " + id + " not found"));
@@ -45,7 +52,12 @@ public class CouponService {
         Coupon coupon = mapper.toDomain(entity);
         coupon.softDelete();
 
-        CouponJpaEntity updated = mapper.toEntity(coupon);
-        repository.save(updated);
+        repository.save(mapper.toEntity(coupon));
+    }
+
+    public List<Coupon> findAll() {
+        return repository.findAll().stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 }

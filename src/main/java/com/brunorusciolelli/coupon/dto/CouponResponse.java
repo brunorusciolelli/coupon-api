@@ -5,6 +5,8 @@ import com.brunorusciolelli.coupon.domain.entity.CouponStatus;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public record CouponResponse(
@@ -29,5 +31,13 @@ public record CouponResponse(
                 coupon.isPublished(),
                 coupon.isRedeemed()
         );
+    }
+
+    public static List<CouponResponse> from(List<Coupon> coupons) {
+        List<CouponResponse> listCoupons = new ArrayList<>();
+        for (Coupon coupon : coupons) {
+            listCoupons.add(from(coupon));
+        }
+        return listCoupons;
     }
 }
