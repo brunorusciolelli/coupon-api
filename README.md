@@ -125,6 +125,16 @@ A suíte cobre:
 - **Testes unitários** do `CouponService` (com Mockito)
 - **Testes de integração** do `CouponController` (contexto Spring completo com H2)
 
+## Cobertura de Testes
+
+O projeto utiliza **JaCoCo** com threshold mínimo de 80% de cobertura de linhas. Para gerar o relatório:
+
+```bash
+./mvnw verify
+```
+
+O relatório HTML é gerado em `target/site/jacoco/index.html`. A cobertura atual é de **91%**.
+
 ## Autor
 
 Bruno Rusciolelli — [GitHub](https://github.com/brunorusciolelli)
