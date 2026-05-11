@@ -7,6 +7,7 @@ import com.brunorusciolelli.coupon.repository.CouponJpaEntity;
 import com.brunorusciolelli.coupon.repository.CouponMapper;
 import com.brunorusciolelli.coupon.repository.CouponRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,6 +23,7 @@ public class CouponService {
         this.mapper = mapper;
     }
 
+    @Transactional
     public Coupon createCoupon(CreateCouponRequest request) {
         boolean published = Boolean.TRUE.equals(request.published());
 
@@ -39,12 +41,14 @@ public class CouponService {
         return coupon;
     }
 
+    @Transactional(readOnly = true)
     public Coupon findById(UUID id) {
         return repository.findById(id)
                 .map(mapper::toDomain)
                 .orElseThrow(() -> new CouponNotFoundException("Coupon with id " + id + " not found"));
     }
 
+    @Transactional
     public void deleteCoupon(UUID id) {
         CouponJpaEntity entity = repository.findById(id)
                 .orElseThrow(() -> new CouponNotFoundException("Coupon with id " + id + " not found"));
@@ -55,6 +59,7 @@ public class CouponService {
         repository.save(mapper.toEntity(coupon));
     }
 
+    @Transactional(readOnly = true)
     public List<Coupon> findAll() {
         return repository.findAll().stream()
                 .map(mapper::toDomain)
